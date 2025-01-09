@@ -12,15 +12,18 @@ from frontend.template import *
 from flights import handler
 from django.core import serializers
 
-
 def payment_view(request):
     if request.user.is_authenticated:
         if request.method == "POST":
+            request.session.pop('ticket_ids',None)
             tickets = request.POST.get("tickets")
+            ticketIds = tickets
+            date = None
             if tickets:
                 try:
                     ticket_ids = [int(t) for t in tickets.split(',')]
                     tickets = [Ticket.objects.get(id=ticket_id) for ticket_id in ticket_ids]
+                    date = tickets[0].booking_date.strftime('%Y-%m-%dT%H:%M:%S')
                 except Ticket.DoesNotExist:
                     # Handle the case where a ticket with a given id doesn't exist
                     # For example, you can log the error or return a message
@@ -32,6 +35,9 @@ def payment_view(request):
                 tickets = []
             res = {'tickets': tickets}
             fare = request.POST.get("fare")
+            currency = request.POST.get('currency')
+            print(fare)
+            print(currency)
             cardNumber = request.POST.get('cardNumber')
             cardHolderName = request.POST.get('cardHolderName')
             expMonth = int(request.POST.get('expMonth'))
@@ -40,15 +46,14 @@ def payment_view(request):
             # Lấy ngày tháng năm hiện tại.
             current_year = datetime.today().year
             current_month = datetime.today().month
+            if currency == 'VND':
+                # Chuyển fare từ dạng chuỗi tiền tệ thành số nguyên
+                fare_numeric = float(fare.replace('₫', '').replace(',', '').strip())
+                fare = int(fare_numeric)  # Chuyển thành số nguyên
+                print(f"Fare after conversion: {fare}")
+
             try:
                 # Kiểm tra số của thẻ có dưới 12 chữ số hay không. Không thì báo lỗi
-                if len(cardNumber) != 12:
-                    messages.warning(request, 'Card number must be 12 digits')
-                    return render(request, 'payment.html', {'fare': fare, 'tickets': tickets, 'tripType': tripType})
-                    # Kiểm tra xem thời gian hiệu lực của thẻ
-                if expYear < current_year or (expYear == current_year and expMonth < current_month):
-                    messages.warning(request, 'Card expired')
-                    return render(request, 'payment.html', {'fare': fare, 'tickets': tickets, 'tripType': tripType})
                 payment = Payment.objects.create(
                     fare=fare,
                     card_number=cardNumber,
@@ -56,15 +61,18 @@ def payment_view(request):
                     expMonth=expMonth,
                     expYear=expYear,
                     cvv=cvv,
-                    status='CONFIRMED',
+                    status='PENDING',
                 )
                 for ticket in tickets:
-                    ticket.booking_date = datetime.now()
-                    ticket.status = 'CONFIRMED'
-                    ticket.save()
-                    payment_ticket = PaymentTicket.objects.create(payment=payment, ticket=ticket)
-                    payment_ticket.save()
-                payment.save()
+                    if ticket.status == 'PENDING':
+                        ticket.booking_date = datetime.now()
+                        ticket.status = 'CONFIRMED'
+                        ticket.save()
+                        payment_ticket = PaymentTicket.objects.create(payment=payment, ticket=ticket)
+                        payment_ticket.save()
+                if tickets[0].status == 'CONFIRMED':
+                    payment.status = 'CONFIRMED'
+                    payment.save()
                 return render(request, 'payment_process.html', res)
             except Exception as e:
                 return HttpResponse(e)
@@ -89,6 +97,21 @@ def ticket_data(request, ref):
 def book(request):
     if request.user.is_authenticated:
         if request.method == "POST":
+            tripType = request.POST.get('tripType')
+            ticket_ids = request.session.get('ticket_ids')
+            if ticket_ids:
+                total = 0
+                ticketIds = ticket_ids.split(',')
+                for ticket_id in ticketIds:
+                    ticket = Ticket.objects.get(id=int(ticket_id))
+                    total += ticket.total_fare
+                res = {
+                    'fare': total,
+                    'tickets': ticket_ids,
+                    'tripType': tripType,
+                    'date': Ticket.objects.get(id=int(ticketIds[0])).booking_date.strftime('%Y-%m-%dT%H:%M:%S')
+                }
+                return render(request, 'payment.html', res)
             data = {}
             seat = request.POST.get('seat')
             people = request.POST.get('people')
@@ -108,6 +131,12 @@ def book(request):
             countrycode = request.POST['countryCode']
             mobile = request.POST['mobile']
             email = request.POST['email']
+            currency = request.POST['currency']
+            print(f"Currency: {currency}")
+            discount = request.POST['coupon']
+            discountPercentage = float(request.POST['discountPercentage'])
+            print(f"discount: {discount}")
+            print(f"discount: {discountPercentage}")
             if tripType == '1':
                 seat = request.POST.get('seat')
                 stop = request.POST.get('stop')
@@ -277,94 +306,72 @@ def book(request):
                 lname = request.POST[f'passenger{i}LName']
                 gender = request.POST[f'passenger{i}Gender']
                 passengers.append(Passenger.objects.create(first_name=fname, last_name=lname, gender=gender.lower()))
-            coupon = request.POST.get('coupon')
+            coupon = discount
             tickets = []
             try:
-                if int(request.POST.get('seat_amount1')) > 0:
-                    for s in seats2:
-                        if tripType == '1':
-                            if stop == 'no':
-                                tickets.append(
-                                    createticket(request.user, passengers, passengerscount, flight1, flight_1date,
-                                                 flight_1class, coupon, countrycode, email, mobile, s))
+                if int(request.POST.get('seat_amount')) > 0:
+                    if tripType == '1':
+                        for s in seats1:
                             if stop == 'yes':
                                 tickets.append(
                                     createticket(request.user, passengers, passengerscount, flight0, flight0Date,
-                                                 seat, coupon, countrycode, email, mobile, s))
+                                                 seat, coupon, countrycode, email, mobile, s,discountPercentage))
                                 tickets.append(
                                     createticket(request.user, passengers, passengerscount, flight1, flight1Date,
-                                                 seat, coupon, countrycode, email, mobile, s))
-                        if tripType == '2':
-                            if stop1 == 'no':
+                                                 seat, coupon, countrycode, email, mobile, s,discountPercentage))
+                            if stop == 'no':
                                 tickets.append(
                                     createticket(request.user, passengers, passengerscount, flight1, flight_1date,
-                                                 flight_1class, coupon, countrycode, email, mobile, s))
-                            if stop1 == 'yes':
-                                tickets.append(
-                                    createticket(request.user, passengers, passengerscount, flight0, flight0Date,
-                                                 seat, coupon, countrycode, email, mobile, s))
-                                tickets.append(
-                                    createticket(request.user, passengers, passengerscount, flight1, flight1Date,
-                                                 seat, coupon, countrycode, email, mobile, s))
-                            if stop2 == 'no':
-                                tickets.append(
-                                    createticket(request.user, passengers, passengerscount, flight2, flight_2date,
-                                                 flight_2class, coupon, countrycode, email, mobile, s))
-                            if stop2 == 'yes':
-                                tickets.append(
-                                    createticket(request.user, passengers, passengerscount, flight2, flight2Date,
-                                                 seat, coupon, countrycode, email, mobile, s))
-                                tickets.append(
-                                    createticket(request.user, passengers, passengerscount, flight3, flight3Date,
-                                                 seat, coupon, countrycode, email, mobile, s))
-                for s in seats1:
-                    if tripType == '1':
-                        if stop == 'no':
-                            tickets.append(
-                                createticket(request.user, passengers, passengerscount, flight1, flight_1date,
-                                             flight_1class, coupon, countrycode, email, mobile, s))
-                        if stop == 'yes':
-                            tickets.append(
-                                createticket(request.user, passengers, passengerscount, flight0, flight0Date,
-                                             seat, coupon, countrycode, email, mobile, s))
-                            tickets.append(
-                                createticket(request.user, passengers, passengerscount, flight1, flight1Date,
-                                             seat, coupon, countrycode, email, mobile, s))
-                    if tripType == '2':
+                                                 flight_1class, coupon, countrycode, email, mobile, s,discountPercentage))
+
+                if int(request.POST.get('seat_amount1')) > 0:
+                    for s in seats2:
                         if stop1 == 'no':
                             tickets.append(
                                 createticket(request.user, passengers, passengerscount, flight1, flight_1date,
-                                             flight_1class, coupon, countrycode, email, mobile, s))
+                                             flight_1class, coupon, countrycode, email, mobile, s,discountPercentage))
                         if stop1 == 'yes':
                             tickets.append(
                                 createticket(request.user, passengers, passengerscount, flight0, flight0Date,
-                                             seat, coupon, countrycode, email, mobile, s))
+                                             seat, coupon, countrycode, email, mobile, s,discountPercentage))
                             tickets.append(
                                 createticket(request.user, passengers, passengerscount, flight1, flight1Date,
-                                             seat, coupon, countrycode, email, mobile, s))
+                                             seat, coupon, countrycode, email, mobile, s,discountPercentage))
                         if stop2 == 'no':
                             tickets.append(
                                 createticket(request.user, passengers, passengerscount, flight2, flight_2date,
-                                             flight_2class, coupon, countrycode, email, mobile, s))
+                                             flight_2class, coupon, countrycode, email, mobile, s,discountPercentage))
                         if stop2 == 'yes':
                             tickets.append(
                                 createticket(request.user, passengers, passengerscount, flight2, flight2Date,
-                                             seat, coupon, countrycode, email, mobile, s))
+                                             seat, coupon, countrycode, email, mobile, s,discountPercentage))
                             tickets.append(
                                 createticket(request.user, passengers, passengerscount, flight3, flight3Date,
-                                             seat, coupon, countrycode, email, mobile, s))
+                                             seat, coupon, countrycode, email, mobile, s,discountPercentage))
 
                 total_fare = sum([t.total_fare for t in tickets])
+                if discountPercentage < 100:
+                    total_fare += (FEE * (100 - discountPercentage)/100)
+                else:
+                    total_fare += FEE
+                if currency == 'VND':
+                    total_fare *= 24000
+                    fare_formatted = "{:,.0f} ₫".format(total_fare)
+                print(f"Total Fare after conversion: {total_fare}")
+                fare_formatted = int(total_fare)
             except Exception as e:
                 return HttpResponse(e)
             ticket_ids = ''
             for ticket in tickets:
                 ticket_ids += str(ticket.pk) + ','
             ticket_ids = ticket_ids.rstrip(',')
+            request.session['ticket_ids'] = ticket_ids
             res = {
-                'fare': total_fare,
+                'currency': currency,
+                'fare': fare_formatted,
                 'tickets': ticket_ids,
                 'tripType': tripType,
+                'date': tickets[0].booking_date.strftime('%Y-%m-%dT%H:%M:%S')
             }
             if tripType == '1':
                 if stop == 'yes':
@@ -384,9 +391,21 @@ def book(request):
     else:
         return HttpResponseRedirect(reverse('login'))
 
+def cancelPayment(request,tickets):
+    ticket_ids = tickets.split(',')
+    tickets = [Ticket.objects.get(id=int(t)) for t in ticket_ids]
+    for ticket in tickets:
+        ticket.status = 'CANCELLED'
+        ticket.save()
+        seats = TicketSeat.objects.filter(ticket=ticket)
+        for s in seats:
+            seat = Seat.objects.get(pk=s.seat.pk)
+            seat.status = 'AVAILABLE'
+            seat.save()
+    return render(request, "index.html", )
 
 def createticket(user, passengers, passengerscount, flight1, flight_1date, flight_1class, coupon, countrycode, email,
-                 mobile, seat):
+                 mobile, seat,percent):
     coupons = {'FL928K': 0.3, 'FL239D': 0.4, 'FL138S': 0.2}
     ticket = Ticket.objects.create()
     ticket.user = user
@@ -413,7 +432,7 @@ def createticket(user, passengers, passengerscount, flight1, flight_1date, fligh
         ticket.flight_fare = flight1.economy_fare * int(passengerscount)
         ffre = flight1.economy_fare * int(passengerscount)
     ticket.other_charges = FEE
-    ticket.total_fare = ffre + FEE + 0.0 + seat.price
+    ticket.total_fare = ffre  + 0.0 + seat.price
     ##########Total(Including coupon)
     # set status của seat
     seat.status = 'SELECTED'
@@ -421,10 +440,9 @@ def createticket(user, passengers, passengerscount, flight1, flight_1date, fligh
     ticket_seat = TicketSeat.objects.create(ticket=ticket, seat=seat)
     ticket_seat.save()
     if coupon:
-        flight1.economy_fare = round(flight1.economy_fare * (1 - coupons[coupon]), 1)
-        flight1.save()
-        ticket.coupon_used = coupon
-        ticket.total_fare = round(ticket.total_fare * (1 - coupons[coupon]), 1)
+        if percent < 100:
+            ticket.coupon_used = coupon
+            ticket.total_fare = round(ticket.total_fare * (100 - percent) / 100, 1)
     ticket.seat_class = flight_1class.lower()
     ticket.status = 'PENDING'
     ticket.mobile = ('+' + countrycode + ' ' + mobile)

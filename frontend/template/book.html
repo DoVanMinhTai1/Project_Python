@@ -278,7 +278,7 @@
                     </div>
                     {% endif%}
                     {% if stop2 == 'yes' %}
-
+                    <hr>
                         <h5>Flight 2 Details</h5>
                         <hr>
                         <div class="media-airline">
@@ -645,7 +645,7 @@
                         <h5>Contact Information</h5>
                     </div>
                     <hr>
-                    
+
                     <div class="row contact-details-div">
                         <div class="row form-group">
                             <!--<div class="input-group col">
@@ -914,10 +914,10 @@
                                 <input type="text" class="form-control" id="lname" placeholder="Last name">
                             </div>
                         </div>
-                        
+
                         <div class="row form-group radio-div">
                             <div class="form-check-inline cd">
-                                Gender: 
+                                Gender:
                             </div>
                             <div class="form-check-inline">
                                 <label class="form-check-label">
@@ -943,12 +943,11 @@
                 </div>
                 <div class="col-4">
                     <div class="price-details">
-                        <h5>Fare Summary</h5>
-                        <hr>
-                        <div class="row">
+                        <div class="row" style="display: flex; width: 100%; justify-content: space-between; margin: 0; align-items: center;">
+                            <h5>Fare Summary</h5>
                             <div class="currency-switcher">
-                                <label for="currency">Choose currency: </label>
-                                <select id="currency" onchange="updateCurrency ()">
+                                <!-- <label for="currency">Choose currency: </label> -->
+                                <select id="currency" onchange="updateCurrency ()" style="align-items: center;" name="currency">
                                 <option value="USD" selected>USD ($)</option>
                                 <option value="VND">VND (₫)</option>
                                 </select>
@@ -959,7 +958,7 @@
                             <div class="base-fae-label">Base Fare: </div>
                             <div class="base-fare-value">
                                 {% if seat == 'First' %}
-                                $ <span>
+                                <span>
                                     {% if tripType == '1' %}
                                         {% if stop == 'yes' %}
                                             {{ flight0.first_fare | add:flight1.first_fare }}
@@ -976,7 +975,7 @@
                                         {% else %}
                                             {{ flight1.first_fare | add:flight2.first_fare }}
                                         {% endif %}
-                                    {% endif %}
+                                    {% endif %} $
                                 </span>
                                 <input type="hidden" id="basefare" value="
                                     {% if tripType == '1' %}
@@ -998,7 +997,7 @@
                                     {% endif %}
                                 ">
                             {% elif seat == 'Business' %}
-                                $ <span>
+                                 <span>
                                     {% if tripType == '1' %}
                                         {% if stop == 'yes' %}
                                             {{ flight0.business_fare | add:flight1.business_fare }}
@@ -1015,7 +1014,7 @@
                                         {% else %}
                                             {{ flight1.business_fare | add:flight2.business_fare }}
                                         {% endif %}
-                                    {% endif %}
+                                    {% endif %} $
                                 </span>
                                 <input type="hidden" id="basefare" value="
                                     {% if tripType == '1' %}
@@ -1037,7 +1036,7 @@
                                     {% endif %}
                                 ">
                             {% elif seat == 'Economy' %}
-                                $ <span>
+                                 <span>
                                     {% if tripType == '1' %}
                                         {% if stop == 'yes' %}
                                             {{ flight0.economy_fare | add:flight1.economy_fare }}
@@ -1054,7 +1053,7 @@
                                         {% else %}
                                             {{ flight1.economy_fare | add:flight2.economy_fare }}
                                         {% endif %}
-                                    {% endif %}
+                                    {% endif %} $
                                 </span>
                                 <input type="hidden" id="basefare" value="
                                     {% if tripType == '1' %}
@@ -1081,7 +1080,7 @@
                         </div>
                         <div class="row surcharges">
                             <div class="surcharges-label">Fee & Surcharges: </div>
-                            <div class="surcharges-value">$ <span>{{fee}}</span></div>
+                            <div class="surcharges-value"><span>{{fee}} $</span></div>
                             <input type="hidden" id="fee" value="{{fee}}">
                         </div>
                         <div class="row surcharges" id="seatSelected">
@@ -1097,7 +1096,7 @@
                             <div class="total-fare-label">Total Fare: </div>
                             <div class="total-fare-value">
                                 {% if seat == 'First' %}
-                                    $ <span>
+                                     <span>
                                         {% if tripType == '1' %}
                                             {% if stop == 'yes' %}
                                                 {{ flight0.first_fare | add:flight1.first_fare | add:fee }}
@@ -1114,10 +1113,10 @@
                                             {% else %}
                                                 {{ flight1.first_fare | add:flight2.first_fare | add:fee }}
                                             {% endif %}
-                                        {% endif %}
+                                        {% endif %} $
                                     </span>
                                 {% elif seat == 'Business' %}
-                                    $ <span>
+                                     <span>
                                         {% if tripType == '1' %}
                                             {% if stop == 'yes' %}
                                                 {{ flight0.business_fare | add:flight1.business_fare | add:fee }}
@@ -1134,10 +1133,10 @@
                                             {% else %}
                                                 {{ flight1.business_fare | add:flight2.business_fare | add:fee }}
                                             {% endif %}
-                                        {% endif %}
+                                        {% endif %} $
                                     </span>
                                 {% elif seat == 'Economy' %}
-                                    $ <span>
+                                     <span>
                                         {% if tripType == '1' %}
                                             {% if stop == 'yes' %}
                                                 {{ flight0.economy_fare | add:flight1.economy_fare | add:fee }}
@@ -1154,7 +1153,7 @@
                                             {% else %}
                                                 {{ flight1.economy_fare | add:flight2.economy_fare | add:fee }}
                                             {% endif %}
-                                        {% endif %}
+                                        {% endif %} $
                                     </span>
                                 {% endif %}
                             </div>
@@ -1162,20 +1161,24 @@
                         </div>
                     </div>
                     <div class="coupon-code">
-                        <h5>Have a coupon code?</h5>
-                        <hr>
-                        <div class="row base-fare">
-                            <div class="col-9" style="padding: 10px 10px 10px 0px">
-                                <input type="text" name="coupon" class="form-control" placeholder="Coupon Code" style="text-transform: uppercase;">
+                            <h5>Have a coupon code?</h5>
+                            <hr>
+                            <div class="row base-fare">
+                                <div class="col-9" style="padding: 10px 10px 10px 0px">
+                                    <input type="text" name="coupon" class="form-control" placeholder="Coupon Code" style="text-transform: uppercase;">
+                                </div>
+                                                        <div class="col coupon-apply" style="padding: 10px 10px 10px 0px">
+                                    <center>
+                                    <button type="button" class="btn btn-primary btn-danger" id="applyCoupon" name="useCoupon" value="executeCoupon" onclick="discount()">Apply</button>
+                                    </center>
+                                </div>
                             </div>
-                            <div class="col coupon-apply" style="padding: 10px 10px 10px 0px">
-                                <center>
-                                   <button type="button" class="btn btn-primary btn-danger" id="applyCoupon" name="useCoupon" value="executeCoupon" onclick="discount()">Apply</button>
-                                </center>
+                            <div id="couponInfo" style="display:none;">
+                                <input type="hidden" id="couponCodeHidden" name="coupon" value="">
+                                <input type="hidden" id="discountPercentageHidden" name="discountPercentage" value="">
                             </div>
                         </div>
                     </div>
-                </div>
                 <div class="col media-payment-btn">
                     <div>
                         <button type="submit" class="btn btn-primary btn-danger" name="payment" value="executePayment">Proceed to payment</button>
@@ -1185,6 +1188,41 @@
         </form>
     </section>
 <style>
+
+.currency-switcher {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.currency-switcher select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.currency-switcher select:hover {
+    border-color: #007bff;
+}
+
+.currency-switcher select:focus {
+    outline: none;
+    border-color: #0056b3;
+}
+
+.row h5 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+
+
+
+
     .notification {
     color: red;
     font-weight: bold;
@@ -1281,17 +1319,22 @@
   height: 20px;
 }
 </style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     let selectedCount = 0;
     let amount_seat = 0;
     let previousSelectedSeats = [];  // Mảng lưu trữ các ghế đã chọn trước đó
 
+    function formatVND(value) {
+                return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Thêm dấu chấm
+            }
     // Add click event to all seats
     document.querySelectorAll('.seat').forEach(seat => {
         seat.addEventListener('click', () => {
             let seatValue = parseInt(seat.getAttribute('value'));
             const seatId = seat.nextElementSibling.value;
-            const seatPrice = trip(parseFloat(seat.getAttribute('value')));
+            const seatPrice = trip(parseInt(seat.getAttribute('value')));
             console.log(seatPrice);
             // Cập nhật trạng thái ghế
             if (!seat.classList.contains('selected')) {
@@ -1352,7 +1395,7 @@
         document.querySelectorAll('.seat.choose').forEach(seat => {
             const seatId = seat.nextElementSibling.value;
             const seatName = seat.textContent;
-            let seatPrice = trip(parseFloat(seat.getAttribute('value')));
+            let seatPrice = trip(parseInt(seat.getAttribute('value')));
             const currencySelect = document.getElementById('currency');  // Define the variable here
             const selectedCurrency = currencySelect.value;
 
@@ -1384,9 +1427,8 @@
                 surchargeValueDiv.innerHTML = `${seatName} - $<span>${(seatPrice * percentDiscount)}</span>`;
                 seatSelectedContainer.appendChild(surchargeValueDiv);
 
-                totalFare += seatPrice;
                 console.log(totalFare);
-                
+
                 // Increment seat count
                 countSeat++;
             }
@@ -1404,19 +1446,19 @@
         let feeElement = document.querySelector(".row.surcharges .surcharges-value span");
         const currencySelect = document.getElementById('currency');  // Get the currency select element
         let fee;  // Declare fee variable
-        let cleanedFeeText 
+        let cleanedFeeText
         if(currencySelect.value === 'VND') {
 
-            totalFare = parseFloat(totalFare);
+            totalFare = parseInt(totalFare);
             console.log("oke here 1");
             console.log("1a" +totalFare);
-            
+
 
         } else {
             totalFare = parseInt(totalFare);
             console.log("oke here");
             console.log("1a" +totalFare);
-            
+
         }
         // totalFare = parseFloat(totalFare);
 
@@ -1435,7 +1477,7 @@
         }
         // Clean up and parse the fare as well (in case it has currency symbols like ₫)
         let cleanedFare = fare;
-        let parsedFare
+        let parsedFare;
         if(currencySelect.value === 'USD') {
          parsedFare = parseFloat(cleanedFare); // Or use parseFloat if necessary
         } else {
@@ -1450,22 +1492,29 @@
         console.log("Fare:", parsedFare);
         console.log("Fee:", fee);
         // Calculate totalFare based on selected currency
+        const surchargeValues = document.querySelectorAll(".surcharges-value");
+
+        // Initialize a total variable
+        let totalSurcharge = 0;
+
+        // Iterate through each element
+        surchargeValues.forEach(div => {
+            // Find the span inside the div and get its value
+            const value = parseFloat(div.querySelector("span").innerText);
+            // Add the value to the total
+            totalSurcharge += value;
+        });
         totalFare = parseInt(totalFare);
         parsedFare = parseInt(parsedFare);
         fee = parseInt(fee);
-        totalFare = (totalFare + parsedFare + fee);
-
-       
-
-
-
+        totalFare = (totalFare + parsedFare + totalSurcharge);
 
         // Update the total fare in the UI
         const selectedCurrency = document.getElementById('currency').value; // Lấy loại tiền tệ đã chọn
         function formatVND(value) {
             return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Thêm dấu chấm
         }
-        totalFareContainer.innerText = selectedCurrency === 'USD' ? totalFare.toFixed(1) : `${formatVND(Math.round(totalFare))}₫`;
+        totalFareContainer.innerText = selectedCurrency === 'USD' ? totalFare.toFixed(0) : `${formatVND(Math.round(totalFare))}₫`;
 
         // Update the seat count
         document.getElementById('chosenCount').value = currentSelectedSeats.length;
@@ -1544,6 +1593,18 @@
             const seatId = seat.nextElementSibling.value;
             const seatName = seat.textContent;
             let seatPrice = trip(parseFloat(seat.getAttribute('value')));
+            const currencySelect = document.getElementById('currency');  // Define the variable here
+            const selectedCurrency = currencySelect.value;
+
+            const exchangeRate = exchangeRates[selectedCurrency];
+
+            if (currencySelect.value === 'VND') {
+                seatPrice *= exchangeRate; // Convert from USD to VND
+
+            }
+            function formatVND(value) {
+                return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Thêm dấu chấm
+            }
             // Add seat to the currentSelectedSeats1 array
             if (!currentSelectedSeats1.includes(seatId)) {
                 currentSelectedSeats1.push(seatId);
@@ -1558,24 +1619,69 @@
                 // Create surcharge value div for the return flight seat
                 const surchargeValueDiv1 = document.createElement('div');
                 surchargeValueDiv1.classList.add('surcharges-value');
-                surchargeValueDiv1.innerHTML = `${seatName} - $<span>${(seatPrice * percentDiscount).toFixed(2)}</span>`;
+                surchargeValueDiv1.innerHTML = `${seatName} - $<span>${(seatPrice * percentDiscount).toFixed(0)}</span>`;
                 seatSelectedContainer1.appendChild(surchargeValueDiv1);
-
 
                 totalFare += seatPrice; // Add seat price to total fare
             }
         });
 
         // Update the total fare with the base fare and fee for the return flight
-        let fare1 = document.querySelector(".base-fare-value1 span").textContent;
-        let fee1 = document.querySelector("#fee1").value;
-        totalFare = parseFloat(fare1) + parseFloat(fee1) + totalFare;
+        let fare1 = document.querySelector(".base-fare-value span").textContent;
+        let feeElement = document.querySelector(".row.surcharges#seatSelected1 .surcharges-value span");
+        // Get the seat fee value from the span inside the surcharges-value class
+        const surchargeValues = document.querySelectorAll(".surcharges-value");
+        const currencySelect = document.getElementById('currency');  // Get the currency select element
+        // Initialize a total variable
+        let totalSurcharge = 0;
+        let cleanedFeeText;
+        let fee;
+        let parsedFare;
+        if(currencySelect.value === 'USD') {
+         cleanedFeeText = feeElement.textContent;
+            
+        } else  {
+            cleanedFeeText = feeElement.textContent.replace(/[^\d.-]/g, '');
+        }
+        if(currencySelect.value === 'USD') {
+            fee = parseInt(cleanedFeeText);
 
-        // Update the total fare in the UI
-        totalFareContainer1.innerText = totalFare.toFixed(1);
+        } else {
+            fee = (cleanedFeeText.replace(/[^\d-]/g, '')); 
+        }
+        if(currencySelect.value === 'USD') {
+            parsedFare = parseInt(fare1);
+        } else {
+            parsedFare = (fare1.replace(/[^\d-]/g, ''));
+        }
+        // Iterate through each element
+        surchargeValues.forEach(div => {
+            // Find the span inside the div and get its value
+            let value =0;
+            if(currencySelect.value === 'USD') {
+             value = parseInt(div.querySelector("span").innerText);
+        } else {
+             value = parseInt(div.querySelector("span").innerText.replace(/[^\d-]/g, ''));
+        }
+            // Add the value to the total
+            totalSurcharge += value;
+        });
+        console.log(fare1);
+        if(currencySelect.value === 'USD') {
+            fare1 = parseInt(fare1);
+        } else {
+          fare1 =  fare1.replace(/[^\d-]/g, '')
+        }
+        if(currencySelect.value === 'USD') {
+            totalFareContainer1.innerText =  parseInt(fare1)  + totalSurcharge;
+        
+        } else {
+        totalFareContainer1.innerText = formatVND(  parseInt(fare1)  + totalSurcharge);
+
+    }
 
         // Update the seat count
-        document.getElementById('chosenCount1').value = currentSelectedSeats1.length;
+        document.getElementById('chosenCount1').value = formatVND(currentSelectedSeats1.length);
     }
 
     const exchangeRates = {
@@ -1583,7 +1689,7 @@
         VND: 24000,    // Tỉ giá USD sang VND
     };
 
-    // Hàm cập nhật giá trị của ghế dựa trên loại tiền tệ
+   // Hàm cập nhật giá trị của ghế dựa trên loại tiền tệ
     function updateCurrency() {
         const selectedCurrency = document.getElementById('currency').value; // Lấy loại tiền tệ đã chọn
         console.log(`Loại tiền tệ đã chọn: ${selectedCurrency}`);
@@ -1597,8 +1703,8 @@
         console.log(`Giá trị base fare: ${baseFare}, Phí: ${fee}`);
 
         // Chuyển đổi tiền tệ từ USD sang tiền tệ đã chọn
-        const convertedBaseFare = (baseFare * exchangeRates[selectedCurrency]).toFixed(1);
-        const convertedFee = (fee * exchangeRates[selectedCurrency]).toFixed(1);
+        const convertedBaseFare = (baseFare * exchangeRates[selectedCurrency]).toFixed(0);
+        const convertedFee = (fee * exchangeRates[selectedCurrency]).toFixed(0);
         let totalFare = (baseFare + fee) * exchangeRates[selectedCurrency];
         console.log(`Base fare sau khi chuyển đổi: ${convertedBaseFare}, Phí sau khi chuyển đổi: ${convertedFee}, Tổng tiền sau khi chuyển đổi: ${totalFare}`);
 
@@ -1606,9 +1712,21 @@
             return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Thêm dấu chấm
         }
         // Cập nhật hiển thị giao diện cho base fare và fee
-        document.querySelector('.base-fare-value span').innerText = selectedCurrency === 'USD' ? ` ${convertedBaseFare}` : `${formatVND(Math.round(convertedBaseFare))}₫`;
-        document.querySelector('.surcharges-value span').innerText = selectedCurrency === 'USD' ? ` ${convertedFee}` : `${formatVND(Math.round(convertedFee))}₫`;
-        totalFareElement.innerText = selectedCurrency === 'USD' ? ` ${totalFare}` : `${formatVND(totalFare.toFixed(0))}₫`;
+        let pcount = parseInt(document.querySelector("#p-count").value) || 0;
+        
+        if(pcount > 0) {
+            totalFare = totalFare * pcount;
+            const updateBasefare = convertedBaseFare *pcount;
+            document.querySelector('.base-fare-value span').innerText = selectedCurrency === 'USD' ? ` ${updateBasefare}$` : `${formatVND(Math.round(updateBasefare))}₫`;
+        document.querySelector('.surcharges-value span').innerText = selectedCurrency === 'USD' ? ` ${convertedFee}$` : `${formatVND(Math.round(convertedFee))}₫`;
+     
+        } else {
+            totalFare = totalFare;
+            document.querySelector('.base-fare-value span').innerText = selectedCurrency === 'USD' ? ` ${convertedBaseFare}$` : `${formatVND(Math.round(convertedBaseFare))}₫`;
+        document.querySelector('.surcharges-value span').innerText = selectedCurrency === 'USD' ? ` ${convertedFee}$` : `${formatVND(Math.round(convertedFee))}₫`;
+
+        }
+        totalFareElement.innerText = selectedCurrency === 'USD' ? ` ${totalFare} $` : `${formatVND(totalFare.toFixed(0))}₫`;
 
         const seatContainer = document.getElementById('seatSelected');
 
@@ -1656,15 +1774,14 @@
                     ? convertedSeatPrice // Hiển thị 2 số thập phân cho USD
                     : formatVND(Math.round(convertedSeatPrice)); // Định dạng VND với dấu chấm và không có số thập phân
 
-
                 // Làm sạch và cập nhật lại surchargeDiv
-                surchargeDiv.innerHTML = `${seatName} - ${selectedCurrency === 'USD' ? '$' : '₫'}<span>${formattedPrice}</span>`;
+                surchargeDiv.innerHTML = `${seatName} - <span>${formattedPrice}</span>${selectedCurrency === 'USD' ? '$' : '₫'}`;
 
                 // Cập nhật giá trị của input hidden tương ứng
-                const hiddenInput = seatContainer.querySelectorAll('input[type="hidden"]')[index];
-                if (hiddenInput) {
-                    hiddenInput.value = formattedPrice;
-                }
+                // const hiddenInput = seatContainer.querySelectorAll('input[type="hidden"]')[index];
+                // if (hiddenInput) {
+                //     hiddenInput.value = formattedPrice;
+                // }
                 console.log(123);
                 totalFare += convertedSeatPrice;
 
@@ -1673,7 +1790,56 @@
             }
         });
 
-        totalFareElement.innerText = selectedCurrency === 'USD' ? ` ${totalFare}` : `${formatVND(totalFare.toFixed(0))}₫`;
+
+        const seatContainer1 = document.getElementById('seatSelected1'); // Container cho ghế và surcharge của chuyến về
+
+    seatContainer1.querySelectorAll('.surcharges-value').forEach((surchargeDiv, index) => {
+        // Lấy tên ghế và giá trị surcharge từ phần tử .surcharges-value
+        const seatName = surchargeDiv.textContent.split('-')[0].trim();
+        const spanElement = surchargeDiv.querySelector('span'); // Lấy phần tử <span> chứa giá trị surcharge
+
+        console.log('day la span' + spanElement);
+        console.log(spanElement?.textContent.replace(/[^0-9.,]/g, '') || 0);
+
+        // Làm sạch giá trị giá ghế, loại bỏ dấu chấm và chỉ giữ lại dấu phẩy nếu có
+        let seatPriceStr = spanElement?.textContent.replace(/[^0-9.,]/g, ''); // Loại bỏ ký tự không phải số và dấu phân cách
+        let seatPriceCleaned = seatPriceStr.replace(/\./g, ''); // Loại bỏ dấu chấm (dấu phân cách ngàn)
+        let seatPrice = parseInt(parseFloat(seatPriceCleaned.replace(',', '.')) || 0); // Chuyển thành số, nếu có dấu phẩy chuyển thành dấu chấm
+
+        console.log(`Giá ghế: ${seatPrice}`);
+        console.log(exchangeRates);
+
+        if (!isNaN(seatPrice)) {
+            let convertedSeatPrice;
+            if (selectedCurrency === 'USD') {
+                // Chuyển đổi từ VND sang USD
+                convertedSeatPrice = seatPrice / exchangeRates.VND;
+            } else {
+                // Chuyển đổi từ USD sang VND
+                convertedSeatPrice = seatPrice * exchangeRates.VND;
+            }
+
+            // Hiển thị giá đã chuyển đổi theo loại tiền tệ
+            const formattedPrice = selectedCurrency === 'USD'
+                ? convertedSeatPrice // Hiển thị 2 số thập phân cho USD
+                : formatVND(Math.round(convertedSeatPrice)); // Định dạng VND với dấu chấm và không có số thập phân
+
+          // Làm sạch và cập nhật lại surchargeDiv
+            surchargeDiv.innerHTML = `${seatName} - <span>${formattedPrice}</span>${selectedCurrency === 'USD' ? '$' : '₫'}`;
+
+            // Cập nhật giá trị của input hidden tương ứng
+            // const hiddenInput = seatContainer1.querySelectorAll('input[type="hidden"]')[index];
+            // if (hiddenInput) {
+            //     hiddenInput.value = formattedPrice;
+            // }
+
+        } else {
+            console.warn(`Không thể chuyển đổi giá trị tiền tệ cho: ${seatName}`);
+        }
+    });
+
+
+        totalFareElement.innerText = selectedCurrency === 'USD' ? ` ${totalFare}$` : `${formatVND(totalFare.toFixed(0))}₫`;
 
 
         document.querySelectorAll('.fare-summary .value').forEach(valueDiv => {

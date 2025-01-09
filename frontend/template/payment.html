@@ -27,12 +27,14 @@
                     </div>
                 </div>
                 <div class="payment-details-input-box">
+                    <span> Payment Remain Time</span>
+                    <div id="countdown"></div>
 
-                   <form action="{% url 'checkout' %}" method="POST">
+                   <form action="{% url 'checkout' %}" method="POST" id="paymentForm">
                         {% csrf_token %}
                         <input type="hidden" name="fare" value="{{fare}}">
-                        <input type="hidden" name="tickets" value="{{tickets}}">
-                        <!-- Điều kiện cho tripType == '1' -->
+                        <input type="hidden" name="tickets" value="{{tickets}}" id="tickets">
+
                         {% if tripType == '1' %}
                             {% if stop == 'yes' %}
                                 <input type="hidden" name="stop" value="{{ stop }}">
@@ -44,7 +46,6 @@
                             {% endif %}
                         {% endif %}
 
-                        <!-- Điều kiện cho tripType == '2' -->
                         {% if tripType == '2' %}
                             {% if stop1 == 'yes' %}
                                 <input type="hidden" name="stop1" value="{{ stop1 }}">
@@ -52,7 +53,7 @@
                                 <input type="hidden" name="flight1" value="{{ flight1.pk }}">
                             {% elif stop1 == 'no' %}
                                 <input type="hidden" name="stop1" value="{{ stop1 }}">
-                                <input type="hidden" name="flight1" value="{{ flight1.pk}}">
+                                <input type="hidden" name="flight1" value="{{ flight1.pk }}">
                             {% endif %}
                             {% if stop2 == 'yes' %}
                                 <input type="hidden" name="stop2" value="{{ stop2 }}">
@@ -63,17 +64,34 @@
                                 <input type="hidden" name="flight2" value="{{ flight2.pk }}">
                             {% endif %}
                         {% endif %}
+
                         <div class="row payment-amount-div">
                             <div class="form-group">
                                 <label for="payment_amount">PAYMENT AMOUNT</label>
-                                <input type="text" class="form-control" id="payment_amount" name="fare" value="{{fare}}" disabled >
+                                <input type="text" class="form-control" id="payment_amount" name="fare" value="{{fare}}" disabled>
                             </div>
                         </div>
+                        <div class="row currency-div">
+                            <div class="form-group">
+                                <label for="currency">SELECT CURRENCY</label>
+                                <select name="currency" id="currency" class="form-control" required>
+                                    <option value="USD">USD</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="INR">INR</option>
+                                    <option value="VND">VND</option>
+                                    <!-- Add more currency options as needed -->
+                                </select>
+                                <input type="hidden" id="currencyInput" value="{{ currency }}">
+
+                            </div>
+                        </div>
+                        
                         <div class="row card-no-div">
                             <div class="form-group">
                                 <label for="card_number">CARD NUMBER</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="card_number" name="cardNumber" autocomplete="off" maxlength="19" placeholder="Enter card number" required> <!--onkeypress="return isNumericValue(event);"-->
+                                    <input type="number" class="form-control" id="card_number" name="cardNumber" autocomplete="off" maxlength="19" placeholder="Enter card number" required>
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2">
                                         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-credit-card" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -83,16 +101,16 @@
                                         </span>
                                     </div>
                                 </div>
-                                <!--<small id="nameHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>-->
                             </div>
                         </div>
+
                         <div class="row card-holder-div">
                             <div class="form-group">
                                 <label for="card_holder_name">CARD HOLDER'S NAME</label>
                                 <input type="text" name="cardHolderName" class="form-control" id="cardHolderName" placeholder="Enter name" required>
-                                <!--<small id="nameHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>-->
                             </div>
                         </div>
+
                         <div class="row expiry-cvv">
                             <div class="row">
                                 <div class="left-col">
@@ -129,46 +147,22 @@
                                                 <option value="2028">2028</option>
                                                 <option value="2029">2029</option>
                                                 <option value="2030">2030</option>
-                                                <option value="2031">2031</option>
-                                                <option value="2032">2032</option>
-                                                <option value="2033">2033</option>
-                                                <option value="2034">2034</option>
-                                                <option value="2035">2035</option>
-                                                <option value="2036">2036</option>
-                                                <option value="2037">2037</option>
-                                                <option value="2038">2038</option>
-                                                <option value="2039">2039</option>
-                                                <option value="2040">2040</option>
-                                                <option value="2041">2041</option>
-                                                <option value="2042">2042</option>
-                                                <option value="2043">2043</option>
-                                                <option value="2044">2044</option>
-                                                <option value="2045">2045</option>
-                                                <option value="2046">2046</option>
-                                                <option value="2047">2047</option>
-                                                <option value="2048">2048</option>
-                                                <option value="2049">2049</option>
-                                                <option value="2050">2050</option>
-                                                <option value="2051">2051</option>
-                                                <option value="2052">2052</option>
-                                                <option value="2053">2053</option>
-                                                <option value="2054">2054</option>
-                                                <option value="2055">2055</option>
-                                                <option value="2056">2056</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="right-col">
                                     <div class="form-group">
                                         <label for="cvv_number">CVV CODE</label>
-                                        <input type="password" pattern="[0-9]*" class="form-control" placeholder="CVV" id="cvv_number" name="cvv" maxlength="3">    <!--onkeypress="return isNumericValue(event);"-->
-                                        <!--<small id="nameHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>-->
+                                        <input type="password" pattern="[0-9]*" class="form-control" placeholder="CVV" id="cvv_number" name="cvv" maxlength="3">
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                         <div class="payment-btn">
+                            <input type="hidden" name="currency" value="{{ currency }}">
                             <button class="btn btn-primary btn-danger" type="submit">Make payment</button>
                         </div>
                     </form>
@@ -176,4 +170,141 @@
             </div>
         </div>
     </section>
+
+<script>
+  function startCountdownOnPageLoad(timeout) {
+    const countdownElement = document.getElementById("countdown");
+    const form = document.getElementById("paymentForm");
+    const tickets = document.getElementById("tickets").value; // Lấy tickets làm định danh
+
+    if (!countdownElement) {
+        console.error("Countdown element không tìm thấy!");
+        return;
+    }
+
+    function initializeCountdown() {
+        let expireTime = parseInt(localStorage.getItem(`expireTime_${tickets}`), 10);
+
+        if (isNaN(expireTime)) {
+            // Lần đầu truy cập hoặc dữ liệu không hợp lệ, thiết lập lại giá trị mới
+            expireTime = Date.now() + timeout; // Thời điểm hết hạn (milisecond)
+            localStorage.setItem(`expireTime_${tickets}`, expireTime);
+        }
+
+        let intervalId = setInterval(() => {
+            const currentTime = Date.now();
+            let remainingTime = Math.floor((expireTime - currentTime) / 1000); // Thời gian còn lại (giây)
+
+            if (remainingTime <= 0) {
+                clearInterval(intervalId);
+                handleTimeout();
+            } else {
+                let minutes = Math.floor(remainingTime / 60);
+                let seconds = remainingTime % 60;
+                countdownElement.textContent = `Payment Remain Time: ${minutes} : ${seconds}`;
+            }
+        }, 1000);
+
+        form.addEventListener("submit", (event) => {
+            let cardNumber = document.getElementById('card_number').value.trim();
+            let expMonth = document.getElementById('expiry_month').value.trim();
+            let expYear = document.getElementById('expiry_year').value.trim();
+            let currentYear = new Date().getFullYear();
+            let currentMonth = new Date().getMonth() + 1;
+
+            if (cardNumber.length !== 12) {
+                alert('Card number must be 12 digits');
+                event.preventDefault();
+                return;
+            }
+
+            if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
+                alert('Card expired');
+                event.preventDefault();
+                return;
+            }
+
+            clearInterval(intervalId); // Hủy countdown
+            countdownElement.textContent = "Form submitted. Countdown stopped.";
+            localStorage.removeItem(`expireTime_${tickets}`); // Xóa dữ liệu khi form submit
+        });
+
+        window.addEventListener("beforeunload", () => {
+            // Không cần hủy vé nếu người dùng thoát trang
+        });
+    }
+
+    function handleTimeout() {
+        countdownElement.textContent = "Payment timeout.";
+        localStorage.removeItem(`expireTime_${tickets}`);
+        fetch(`/payment/cancel/${tickets}`)
+            .then(() => console.log("Payment canceled due to timeout"))
+            .catch(() => console.log("Failed to cancel payment"));
+        window.location.href = "/";
+    }
+
+    initializeCountdown();
+}
+
+startCountdownOnPageLoad(300000); // 5 phút timeout
+
+
+</script>
+
+<script>
+    // Log giá trị của các biến từ Django Template
+    console.log("Currency: {{ currency }}");
+    console.log("Tickets: {{ tickets }}");
+    console.log("Fare: {{ fare }}");
+    console.log("Trip Type: {{ tripType }}");
+    console.log("Booking Date: {{ date }}");
+
+    // Nếu bạn cần kiểm tra thêm các giá trị khác, bạn có thể thêm vào theo cách tương tự.
+</script>
+<script>
+  window.onload = function() {
+        // Lấy giá trị từ input ẩn
+        var currencyValue = document.getElementById('currencyInput').value;
+        var paymentAmountInput = document.getElementById('payment_amount');
+        var fareValue = parseFloat(paymentAmountInput.value.replace(/[^0-9.-]+/g, "")); // Chuyển giá trị từ string về số
+        // Tìm kiếm và chọn option tương ứng trong dropdown
+        var currencySelect = document.getElementById('currency');
+        function formatVND(amount) {
+        return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+    }
+        for (var i = 0; i < currencySelect.options.length; i++) {
+            if (currencySelect.options[i].value === currencyValue) {
+                currencySelect.selectedIndex = i;
+                break;
+            }
+        }
+        console.log("Initial fare value: " + fareValue);
+        currencySelect.addEventListener('change', function() {
+            var selectedCurrency = currencySelect.value;
+            
+            // Kiểm tra nếu loại tiền tệ là USD
+            if (selectedCurrency === 'USD') {
+                // Chuyển đổi số tiền từ VND sang USD
+                var convertedAmount = fareValue / 24000;  // Giả sử tỷ giá là 1 USD = 24000 VND, thay đổi theo tỷ giá thực tế
+                console.log(convertedAmount);
+                
+                paymentAmountInput.value = Math.round(convertedAmount);  // Chuyển thành số nguyên và cập nhật
+            } else if (selectedCurrency === 'VND') {
+        // Nhân giá trị với tỷ giá 24000
+        var convertedAmount = fareValue * 24000;
+        console.log(convertedAmount);
+        
+        paymentAmountInput.value = formatVND( convertedAmount);  // Cập nhật giá trị đã chuyển đổi
+    }
+            
+            
+            else {
+                // Nếu không phải USD, giữ nguyên giá trị hiện tại
+                paymentAmountInput.value = fareValue;  // Cập nhật lại giá trị nguyên bản
+            }
+        });
+    };
+</script>
+
+
 {% endblock %}
